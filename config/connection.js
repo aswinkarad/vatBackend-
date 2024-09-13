@@ -1,0 +1,123 @@
+const config = require('./database');
+const { Sequelize, DataTypes } = require('sequelize');
+// const Sequelize = require('sequelize')
+
+// INITIALIZATION--
+const sequelize = new Sequelize(
+  config.database, config.username, config.password,
+  {
+    host: config.host,
+    // port:'25060',
+    dialect: "mysql"
+  });
+
+
+// AUTHENTICATION--
+sequelize.authenticate()
+  .then(() => {
+    console.log('--database connected--');
+  }).catch(err =>
+    console.log(`Error:${err}`));
+
+
+// CONNECTION-PROVIDER--
+const db = {};
+db.Sequelize = Sequelize;
+db.sequelize = sequelize;
+db.client = require('../routes/client/client.model')(sequelize, DataTypes);
+db.month = require('../routes/month/month.model')(sequelize, DataTypes);
+// db.date = require('../routes/date/date.model')(sequelize, DataTypes);
+db.bill = require('../routes/bill/bill.model')(sequelize, DataTypes);
+db.admin = require('../routes/Admin/admin.model')(sequelize, DataTypes);
+db.purchase = require('../routes/Purchase/purchase.model')(sequelize, DataTypes);
+db.sale = require('../routes/sales/sale.model')(sequelize, DataTypes);
+db.company = require('../routes/Company/company.model')(sequelize, DataTypes); 
+db.vat = require('../routes/vat/vat.model')(sequelize, DataTypes); 
+
+//ASSOCAITIONS
+//client and company 1-1
+db.client.hasOne(db.company, {
+  foreignKey: {
+    allowNull: true
+  },
+  onDelete: 'RESTRICT',
+})
+db.company.belongsTo(db.client)
+
+// company and vat 1-1
+db.company.hasOne(db.vat, {
+  foreignKey: {
+    allowNull: true
+  },
+  onDelete: 'RESTRICT',
+})
+db.vat.belongsTo(db.company)
+
+//company and sale 1-1
+db.company.hasOne(db.sale, {
+  foreignKey: {
+    allowNull: true
+  },
+  onDelete: 'RESTRICT',
+})
+db.sale.belongsTo(db.company)
+
+//date and sale 1-1
+// db.date.hasOne(db.sale, {
+//   foreignKey: {
+//     allowNull: true
+//   },
+//   onDelete: 'RESTRICT',
+// })
+// db.sale.belongsTo(db.date)
+
+//company and bill 1-1
+db.company.hasOne(db.bill, {
+  foreignKey: {
+    allowNull: true
+  },
+  onDelete: 'RESTRICT',
+})
+db.bill.belongsTo(db.company)
+
+
+//month and date 1-1
+// db.month.hasOne(db.date, {
+//   foreignKey: {
+//     allowNull: true
+//   },
+//   onDelete: 'RESTRICT',
+// })
+// db.date.belongsTo(db.month)
+
+
+//purchase and company 1-1
+db.company.hasOne(db.purchase, {
+  foreignKey: {
+    allowNull: true
+  },
+  onDelete: 'RESTRICT',
+})
+db.purchase.belongsTo(db.company)
+
+//purchase and date 1-1
+// db.date.hasOne(db.purchase, {
+//   foreignKey: {
+//     allowNull: true
+//   },
+//   onDelete: 'RESTRICT',
+// })
+// db.purchase.belongsTo(db.date)
+
+// SYNCING--
+db.sequelize.sync({ alter: true, force: false })
+
+  .then(() => {
+   
+    console.log("--sync done--");
+  }).catch(err => {
+    console.log(`error:${err}`);
+  });
+
+
+module.exports = db
