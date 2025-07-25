@@ -21,5 +21,6 @@ router.post('/bill/create', upload.single('image'), controller.createBill);
 router.put('/bill/update/:id', upload.single('image'), controller.updateBill); 
 router.delete('/bill/delete/:id', controller.deleteBill);
 router.get('/bill/read', controller.readBill);
+router.get('/bill/readALL', controller.BillListBYCOMPANY);
 
 module.exports = router;

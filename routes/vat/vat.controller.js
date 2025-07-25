@@ -11,7 +11,8 @@
 const db = require("../../config/connection")
 const vat = db.vat
 const client = db.client
-const companyModel = db.company // Renaming to avoid conflict
+const companyModel = db.company
+const company = db.company 
 const purchase = db.purchase
 const sale = db.sale
 require("../../middleware/auth")
@@ -130,9 +131,9 @@ const createvat = async (req, res) => {
   
       // Create the VAT record
       const create = await vat.create({
-        purchase_total_amount,
-        sales_total_amount,
-        total_tax_amount: vatTaxAmount,
+        purchase_total_amount:req.body.purchase_total_amount,
+        sales_total_amount:req.body.sales_total_amount,
+        total_tax_amount: req.body.total_tax_amount,
         companyId: req.body.companyId,
       });
   
@@ -153,7 +154,7 @@ const updatevat = async (req, res) => {
 
         purchase_total_amount: req.body.purchase_total_amount,
         sales_total_amount:req.body.sales_total_amount,
-        total_tax_amount: vatTaxAmount,
+        total_tax_amount: req.body.total_tax_amount,
         companyId: req.body.companyId,
 
     }, {
@@ -250,16 +251,7 @@ const vatListByClient = async (req, res) => {
                     }
                 ]
             },
-            // {
-            //     model: db.date,
-            //     attributes: { exclude: ['createdAt', 'updatedAt'] },
-            //     include: [
-            //         {
-            //             model: db.month,
-            //             attributes: { exclude: ['createdAt', 'updatedAt'] },
-            //         }
-            //     ]
-            // }
+            
         ],
         limit,
         offset,

@@ -13,9 +13,11 @@ const createPurchase = async (req, res) => {
 
     const create = await purchase.create({
         // dateId: req.body.dateId,
+         name: req.body.name,
         date:req.body.date,
         amount: req.body.amount,
         companyId: req.body.companyId,
+        vendorId: req.body.vendorId,
         purchase_tax_amount: purchaseTaxAmount,
         status: "1"
     })
@@ -32,9 +34,11 @@ const updatePurchase = async (req, res) => {
 
     const update = await purchase.update({
         // dateId: req.body.dateId,
+         name: req.body.name,
         date:req.body.date,
         amount: req.body.amount,
         companyId: req.body.companyId,
+        vendorId: req.body.vendorId,
         purchase_tax_amount: req.body.purchase_tax_amount,
         status: req.body.status
 

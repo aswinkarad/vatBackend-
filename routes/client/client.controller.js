@@ -130,7 +130,7 @@ const readAdmin = async (req,res) => {
     const { limit, offset } = pg.getPagination(page, size);
     const option = {
         where: {
-           clientId: req.userId
+        //    clientId: req.userId
         },
         // include:[
         //     {

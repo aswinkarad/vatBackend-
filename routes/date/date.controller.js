@@ -99,12 +99,7 @@ const readDate = async (req,res) => {
         where: {
         //    clientId: req.userId
         },
-        // include:[
-        //     {
-        //         model: month,
-        //     }
-
-        // ],
+    
         limit, offset,
         order: [['createdAt', 'DESC']] ,
     }
