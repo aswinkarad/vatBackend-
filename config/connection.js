@@ -33,8 +33,19 @@ db.sale = require('../routes/sales/sale.model')(sequelize, DataTypes);
 db.company = require('../routes/Company/company.model')(sequelize, DataTypes); 
 db.vat = require('../routes/vat/vat.model')(sequelize, DataTypes); 
 db.vendor = require('../routes/vendor/vendor.model')(sequelize, DataTypes);
+db.sale_type = require('../routes/SalesType/SalesType.model')(sequelize, DataTypes);
+db.category = require('../routes/Category/category.model')(sequelize, DataTypes);
+db.subcategory = require('../routes/SubCategory/Subcategory.model')(sequelize, DataTypes);
+db.tax_type = require('../routes/Purchase/Tax.model')(sequelize, DataTypes);
 
-
+//tax_type and purchase Association
+db.tax_type.hasOne(db.purchase, {
+  foreignKey: {
+    allowNull: true
+  },
+  onDelete: 'RESTRICT',
+})
+db.purchase.belongsTo(db.tax_type)
 db.client.hasOne(db.company, {
   foreignKey: {
     allowNull: true
@@ -58,6 +69,23 @@ db.client.hasOne(db.vendor, {
   onDelete: 'RESTRICT',
 })
 db.vendor.belongsTo(db.client)
+
+//sale and sale_type Association
+db.sale_type.hasOne(db.sale, {
+  foreignKey: {
+    allowNull: true
+  },
+  onDelete: 'RESTRICT',
+})
+db.sale.belongsTo(db.sale_type)
+
+db.client.hasOne(db.sale_type, {
+  foreignKey: {
+    allowNull: true
+  },
+  onDelete: 'RESTRICT',
+})
+db.sale_type.belongsTo(db.client)
 
 // company and vat 1-1
 db.company.hasOne(db.vat, {
@@ -94,6 +122,25 @@ db.company.hasOne(db.purchase, {
   onDelete: 'RESTRICT',
 })
 db.purchase.belongsTo(db.company)
+
+
+//category and subcategory Association
+db.category.hasOne(db.subcategory, {
+  foreignKey: {
+    allowNull: true
+  },
+  onDelete: 'RESTRICT',
+})
+db.subcategory.belongsTo(db.category)
+
+//subcategory and purchase Association
+db.subcategory.hasOne(db.purchase, {
+  foreignKey: {
+    allowNull: true
+  },
+  onDelete: 'RESTRICT',
+})
+db.purchase.belongsTo(db.subcategory)
 
 
 db.sequelize.sync({ alter: true, force: false })

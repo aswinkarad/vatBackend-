@@ -15,4 +15,9 @@ router.get('/purchase/listByClient', controller.PurchaseListByClient);
 
 router.get('/purchase/TotalAmount', controller.PurchaseAmount);
 
+//   Tax creation /////
+
+router.post('/Tax/create',  controller.createTax);
+router.get('/Tax/read', controller.TaxList);
+
 module.exports = router 

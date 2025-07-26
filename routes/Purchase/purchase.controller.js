@@ -2,6 +2,7 @@ const db = require("../../config/connection")
 const purchase = db.purchase
 const client = db.client
 const company = db.company
+const tax_type = db.tax_type;
 require("../../middleware/auth")
 const pg = require('../../utils/pagination')
 const { Op } = require("sequelize");
@@ -19,6 +20,8 @@ const createPurchase = async (req, res) => {
         companyId: req.body.companyId,
         vendorId: req.body.vendorId,
         purchase_tax_amount: purchaseTaxAmount,
+        taxTypeId: req.body.taxTypeId, 
+        subcategoryId :req.body.subcategoryId,
         status: "1"
     })
     if (create) {
@@ -27,8 +30,6 @@ const createPurchase = async (req, res) => {
         return res.status(400).send("purchase not created")
     }
 }
-
-
 
 const updatePurchase = async (req, res) => {
 
@@ -40,6 +41,8 @@ const updatePurchase = async (req, res) => {
         companyId: req.body.companyId,
         vendorId: req.body.vendorId,
         purchase_tax_amount: req.body.purchase_tax_amount,
+        taxTypeId: req.body.taxTypeId, 
+        subcategoryId :req.body.subcategoryId,
         status: req.body.status
 
     }, {
@@ -78,7 +81,7 @@ const deletePurchase = async (req, res) => {
 const PurchaseList = async (req, res) => {
     const { page, size, id, name } = req.query;
     const { limit, offset } = pg.getPagination(page, size);
-  
+
     const option = {
         where: {},
         include: [
@@ -89,20 +92,27 @@ const PurchaseList = async (req, res) => {
                     {
                         model: client,
                         attributes: { exclude: ['createdAt', 'updatedAt'] },
-
                     }
                 ]
             },
-            // {
-            //     model: db.date,
-            //     attributes: { exclude: ['createdAt', 'updatedAt'] },
-            //     include: [
-            //         {
-            //             model: db.month,
-            //             attributes: { exclude: ['createdAt', 'updatedAt'] },
-            //         }
-            //     ]
-            // }
+            {
+                model: db.subcategory,
+                attributes: { exclude: ['createdAt', 'updatedAt'] },
+                include: [
+                    {
+                        model: db.category,
+                        attributes: { exclude: ['createdAt', 'updatedAt'] },
+                    }
+                ]
+            },
+            {
+                model: db.tax_type,
+                attributes: { exclude: ['createdAt', 'updatedAt'] },
+            },
+            {
+                model: db.vendor,
+                attributes: { exclude: ['createdAt', 'updatedAt'] },
+            }
         ],
         limit,
         offset,
@@ -112,6 +122,7 @@ const PurchaseList = async (req, res) => {
     if (id) {
         option.where.id = id;
     }
+
     if (name) {
         option.where.name = { [Op.like]: `%${name}%` };
     }
@@ -126,6 +137,7 @@ const PurchaseList = async (req, res) => {
         });
     });
 }
+
 const PurchaseListByClient = async (req, res) => {
     const { page, size, id, name } = req.query;
     const { limit, offset } = pg.getPagination(page, size);
@@ -133,6 +145,21 @@ const PurchaseListByClient = async (req, res) => {
 
     const option = {
         where: {},
+        // include: [
+        //     {
+        //         model: company,
+        //         where: { clientId: req.userId },
+        //         attributes: { exclude: ['createdAt', 'updatedAt'] },
+        //         include: [
+        //             {
+        //                 model: client,
+        //                 attributes: { exclude: ['createdAt', 'updatedAt'] },
+
+        //             }
+        //         ]
+        //     },
+           
+        // ],
         include: [
             {
                 model: company,
@@ -142,20 +169,27 @@ const PurchaseListByClient = async (req, res) => {
                     {
                         model: client,
                         attributes: { exclude: ['createdAt', 'updatedAt'] },
-
                     }
                 ]
             },
-            // {
-            //     model: db.date,
-            //     attributes: { exclude: ['createdAt', 'updatedAt'] },
-            //     include: [
-            //         {
-            //             model: db.month,
-            //             attributes: { exclude: ['createdAt', 'updatedAt'] },
-            //         }
-            //     ]
-            // }
+            {
+                model: db.subcategory,
+                attributes: { exclude: ['createdAt', 'updatedAt'] },
+                include: [
+                    {
+                        model: db.category,
+                        attributes: { exclude: ['createdAt', 'updatedAt'] },
+                    }
+                ]
+            },
+            {
+                model: db.tax_type,
+                attributes: { exclude: ['createdAt', 'updatedAt'] },
+            },
+            {
+                model: db.vendor,
+                attributes: { exclude: ['createdAt', 'updatedAt'] },
+            }
         ],
         limit,
         offset,
@@ -218,12 +252,64 @@ const PurchaseAmount = async (req, res) => {
 };
 
 
+///////////// tax type creation/////////////
+const createTax= async (req, res) => {
+    // const vatRate = 5;
+    // const purchaseTaxAmount = req.body.amount * (vatRate / 100);
+
+    const create = await tax_type.create({
+         tax: req.body.tax,
+       
+    })
+    if (create) {
+        return res.status(200).send("Tax created successfully")
+    } else {
+        return res.status(400).send("Tax not created")
+    }
+}
+
+const TaxList = async (req, res) => {
+    const { page, size, id, name } = req.query;
+    const { limit, offset } = pg.getPagination(page, size);
+  
+    const option = {
+        where: {},
+        
+        limit,
+        offset,
+        order: [['createdAt', 'DESC']],
+    };
+
+    if (id) {
+        option.where.id = id;
+    }
+    if (name) {
+        option.where.name = { [Op.like]: `%${name}%` };
+    }
+
+    await tax_type.findAndCountAll(option).then((result) => {
+        const response = pg.getPagingData(result, page, limit);
+        res.send(response);
+    }).catch(err => {
+        res.status(400).send({
+            response: 'error',
+            message: err.message
+        });
+    });
+}
+
+
+
 module.exports = {
     createPurchase,
     updatePurchase,
     deletePurchase,
     PurchaseList,
     PurchaseListByClient,
-    PurchaseAmount
+    PurchaseAmount,
+
+    //   tax  //
+    createTax,
+    TaxList
 
 }
